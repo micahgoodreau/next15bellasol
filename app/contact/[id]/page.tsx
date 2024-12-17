@@ -13,6 +13,8 @@ import {
     TableHeader,
     TableRow,
   } from "@/components/ui/table";
+  import { TrashIcon } from "@heroicons/react/24/outline";
+import { revalidatePath } from "next/cache";
 
 export default async function Page({
   params,
@@ -50,7 +52,57 @@ export default async function Page({
       .match({ id: contactId })
       .returns<Dbresults[]>()
       .single();
-  
+      const deletePhoneNumber = async (id: string) => {
+        "use server";
+        //const requestUrl = new URL(request.url)
+    
+        const supabase = await createClient();
+        // await supabase.auth.signOut()
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        const var_created_by = user?.id;
+        //console.log(user, var_created_by);
+        const { error } = await supabase
+          .from("phone_numbers")
+          .delete()
+          .eq("id", id);
+        //console.log(id, error);
+        revalidatePath("/");
+    
+        if (error) {
+          console.log(error);
+          return redirect(`/login/login?error=Could not create contact`);
+        }
+    
+        return; //redirect(`/dashbard/building/1/unit/${var_property_id}`);
+      };
+      const deleteEmail = async (id: string) => {
+        "use server";
+        //const requestUrl = new URL(request.url)
+    
+        const supabase = await createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        const var_created_by = user?.id;
+        //console.log(user, var_created_by);
+        const { error } = await supabase
+          .from("email_addresses")
+          .delete()
+          .eq("id", id);
+        //console.log(id, error);
+        revalidatePath("/");
+    
+        if (error) {
+          console.log(error);
+          return redirect(`/login/login?error=Could not create contact`);
+        }
+    
+        return; //redirect(`/dashbard/building/1/unit/${var_property_id}`);
+      };
+    
+      
     if (contact === null) return <>No contact found for id: {contactId}</>;
   
     return (
@@ -69,6 +121,11 @@ export default async function Page({
                 {contact.email_addresses?.map((email) => (
                   <TableRow key={email.id}>
                     <TableCell> {email.email_address}</TableCell>
+                    <TableCell><form action={deleteEmail.bind(null, email.id)}>
+                      <button className="mr-4">
+                        <TrashIcon className="h-4 w-4 text-red-700" />
+                      </button>
+                    </form></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -85,6 +142,11 @@ export default async function Page({
                   <TableRow key={phone.id}>
                     <TableCell> {phone.phone_type}</TableCell>
                     <TableCell> {phone.phone_number}</TableCell>
+                    <TableCell><form action={deletePhoneNumber.bind(null, phone.id)}>
+                      <button className="mr-4">
+                        <TrashIcon className="h-4 w-4 text-red-700" />
+                      </button>
+                    </form></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
