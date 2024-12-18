@@ -25,6 +25,18 @@ export type State =
     }
   | null;
 
+  export async function getContacts(searchString: string) {
+    const supabase = await createClient();
+    const { data: sResults, error } = await supabase
+    .from("contacts")
+    .select(`id, first_name, last_name, contact_type`)
+    .or(`first_name.ilike.%${searchString}%, last_name.ilike.%${searchString}%`)
+    .order("last_name", { ascending: true })
+    .limit(25);
+
+    return sResults;
+    
+  }
 
   export async function addEmail(
     prevState: State | null,
