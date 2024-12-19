@@ -38,30 +38,33 @@ function FormContent({
   const { pending } = useFormStatus();
 
   return (
-    <div className="w-1/2 flex-col-2 mb-2 text-white">
+    <div className="flex mb-2">
       <input
         {...register("contact_id", { value: contact_id })}
         placeholder="property id"
         type="hidden"
       />
-      <div className="w-full mb-2">
+      <div className="flex-row w-1/2 mb-2">
         <input
           {...register("phone_number")}
           placeholder="Phone Number"
-          className="mr-2 border border-black text-white"
+          className="mr-2 bg-primary border-slate-500 text-slate-800"
         />
         <ErrorMessage name="phone_number" errors={errors} />
-      </div>
-      <div className="w-full mb-2">
+        </div>
+        <div className="flex-row">
         <input
           {...register("phone_type")}
           placeholder="Phone Type - CELL, HOME, WORK"
-          className="mr-2 border border-black text-white flex"
+          className="mr-2 bg-primary border-slate-500 text-slate-800"
         />
         <ErrorMessage name="phone_type" errors={errors} />
       </div>
-      <input className="flex" type="submit" disabled={pending || !isValid} />
+      <div className="flex-row">
+      <input className="border-solid border-2 bg-accent border-slate-100 rounded-sm text-primary pr-2 pl-2 h-7" type="submit" disabled={pending || !isValid} />
+      </div>
       {pending && <span>Loading...</span>}
+
     </div>
   );
 }
