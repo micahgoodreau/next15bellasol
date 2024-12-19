@@ -107,9 +107,17 @@ export default async function Page({
   
     return (
         <>
-        <h1>Contact Details - {contact.first_name} {contact.last_name}</h1>
-        <AddPhoneForm contact_id={contact.id} />
-        <AddEmailForm contact_id={contact.id} />
+          <div className="border-b border-black mb-2">
+            <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
+              Contact Details
+            </p>
+        <p><b>First Name:</b> {contact.first_name}</p>
+        <p><b>Last Name:</b>  {contact.last_name}</p>
+        <p><b>Contact Type:</b> {contact.contact_type}</p>
+        </div>
+
+        
+        
         {/*<pre>{JSON.stringify(contact , null, 2)}</pre>*/}
         <div className="border-b border-black mb-2">
             <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
@@ -130,6 +138,7 @@ export default async function Page({
                 ))}
               </TableBody>
             </Table>
+            <AddEmailForm contact_id={contact.id} />
           </div>
           <div className="border-b border-black mb-2">
             <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
@@ -151,6 +160,7 @@ export default async function Page({
                 ))}
               </TableBody>
             </Table>
+            <AddPhoneForm contact_id={contact.id} />
           </div>
         </>
     );

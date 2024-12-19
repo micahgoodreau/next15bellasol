@@ -43,11 +43,11 @@ function FormContent({
         placeholder="property id"
         type="hidden"
       />
-      <div className="flex-row w-3/4 mb-2">
+      <div className="flex-row w-3/4 mb-2 ">
         <input
           {...register("email_address")}
           placeholder="Email Address"
-          className="mr-2 bg-primary border-slate-500 text-slate-800"
+          className="mr-2 border-solid border-2 border-accent"
         />
         <ErrorMessage name="email_address" errors={errors} />
       </div>

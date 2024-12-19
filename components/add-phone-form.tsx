@@ -48,7 +48,7 @@ function FormContent({
         <input
           {...register("phone_number")}
           placeholder="Phone Number"
-          className="mr-2 bg-primary border-slate-500 text-slate-800"
+          className="mr-2  border-solid border-2 border-accent"
         />
         <ErrorMessage name="phone_number" errors={errors} />
         </div>
@@ -56,7 +56,7 @@ function FormContent({
         <input
           {...register("phone_type")}
           placeholder="Phone Type - CELL, HOME, WORK"
-          className="mr-2 bg-primary border-slate-500 text-slate-800"
+          className="mr-2  border-solid border-2 border-accent"
         />
         <ErrorMessage name="phone_type" errors={errors} />
       </div>
