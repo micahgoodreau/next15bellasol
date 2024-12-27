@@ -12,6 +12,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { Button } from "./ui/button";
+import { PencilIcon } from "lucide-react";
 
 export default async function PropertyDetail(props: any) {
   const supabase = await createClient();
@@ -105,7 +106,7 @@ export default async function PropertyDetail(props: any) {
 
   return (
     <>
-      <div className="rounded-xl bg-gray-700 p-2 shadow-sm">
+      <div className="w-400px rounded-xl bg-gray-700 p-2 shadow-sm">
         <div className="flex p-4">
           {/*Icon ? <Icon className="h-5 w-5 text-gray-700" /> : null */}
           <h3 className="ml-2 text-sm text-white font-medium">
@@ -134,14 +135,14 @@ export default async function PropertyDetail(props: any) {
               <p>{leepa_owners?.address4}</p>
               <p>{leepa_owners?.country}</p>
             </div>
-            <div className="w-full flex flex-col-2">
+            <div className="w-full">
               <div>
                 <span className="">
                   LeePA data last updated:{" "}
                   {leepa_owners?.updated_at.slice(0, 10)}
                 </span>
               </div>
-              <div className="text-right w-full">
+              <div className="w-full">
                 <span>
                   <Link
                     href={`https://www.leepa.org/Display/DisplayParcel.aspx?FolioID=${properties?.folio}`}
@@ -168,7 +169,7 @@ export default async function PropertyDetail(props: any) {
                   <Link
                     href={`/contact/${contact.id}`}
                   >
-                    <button className="bg-blue-700 p-2 rounded-sm">Edit Contact</button>
+                    <button className="bg-blue-700 p-2 rounded-full"><PencilIcon /></button>
                   </Link>
                 </p>
                 {contact?.phone_numbers?.map((phone) => (

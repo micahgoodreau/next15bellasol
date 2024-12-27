@@ -77,9 +77,9 @@ export default async function Page({
           <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
           {contact.contact_type} {contact.first_name} {contact.last_name} <Link href={`/contact/${contact.id}`}>Edit</Link>
             </p>
-            <Table>
+            <Table key={contact.id}>
 
-              <TableBody key={contact.id}>
+              <TableBody>
                 {contact?.phone_numbers?.map((phone) => (
                   <TableRow key={phone.id}>
                     <TableCell> {phone.phone_type}</TableCell>

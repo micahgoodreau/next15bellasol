@@ -49,7 +49,7 @@ export default async function Page() {
       <TableCaption>A list of your recent invoices.</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[100px]">Date</TableHead>
+          <TableHead className="text-right">Date</TableHead>
           <TableHead className="text-right">Unit</TableHead>
           <TableHead className="text-right">Sale Amount</TableHead>
           <TableHead>Lee PA Owner</TableHead>
@@ -58,10 +58,10 @@ export default async function Page() {
       <TableBody>
         {leepa_sales.map((sale) => (
           <TableRow key={sale.id}>
-            <TableCell>
+            <TableCell className="text-right">
               {" "}
               <Link
-                href={`/dashboard/building/${sale.building_number}/${sale.property_id}`}
+                href={`/property/${sale.unit_number}`}
               >
                 {sale.sale_date}
               </Link>
