@@ -11,6 +11,9 @@ import { addContactFormSchema, addEmailAddressFormSchema, addPhoneNumberFormSche
 import { ActionResponse, AddressFormData } from "@/types";
 
 
+
+
+
 export type State =
   | {
       status: "success";
@@ -66,12 +69,24 @@ export type State =
     }
   }
 
+  export async function getLeepa() {
+    const supabase = await createClient();
+    const { data: sResults, error } = await supabase
+    .from("leepa_owners")
+    .select(`property_id, owner_name, address1, address2, address3, address4, country, unit_number`)
+    //.or(`owner_name.ilike.%${searchString}%, address1.ilike.%${searchString}%, country.ilike.%${searchString}%`)
+    .order("unit_number", { ascending: true });
+
+    return sResults;
+    
+  }
+  
   
   export async function getContacts(searchString: string) {
     const supabase = await createClient();
     const { data: sResults, error } = await supabase
     .from("contacts")
-    .select(`id, first_name, last_name, contact_type`)
+    .select(`id, first_name, last_name, contact_type, properties(id, unit_number)`)
     .or(`first_name.ilike.%${searchString}%, last_name.ilike.%${searchString}%`)
     .order("last_name", { ascending: true })
     .limit(25);
@@ -186,7 +201,7 @@ export async function addContact(
     } = await supabase.auth.getUser();
     //const var_created_by = user?.id;
 
-    const var_created_by = user?.id;
+    const var_created_by = user?.id || "";
     console.log(user, var_created_by);
     const { data, error } = await supabase.rpc("insert_contact", {
       var_first_name: first_name,

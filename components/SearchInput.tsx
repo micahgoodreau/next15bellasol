@@ -3,6 +3,31 @@
 import { getContacts } from "@/app/actions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
+import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community'; 
+import type { ColDef } from "ag-grid-community";
+
+
+
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+// Row Data Interface
+interface Contact {
+  id: any;
+  first_name: any | null;
+  last_name: any | null;
+  contact_type: any | null;
+};
+interface IResults { contacts: Contact[]};
+
+const myTheme = themeQuartz.withParams({
+  "spacing": 4,
+  "backgroundColor": "#1e1e1e",
+  "textColor": "#f0f0f0",
+  "accentColor": "#268bd2",
+  "rowBorder": "#f0f0f0",
+  "oddRowBackgroundColor": "#2e2e2e",
+});
 
 const SearchInput = () => {
   const [data, setData] = useState<{ id: any; first_name: any; last_name: any; contact_type: any; }[]  | null>();
@@ -11,6 +36,16 @@ const SearchInput = () => {
     search ? search.get("q") : ""
   );
   const router = useRouter();
+    // Column Definitions: Defines & controls grid columns.
+    const [colDefs, setColDefs] = useState<ColDef<Contact>[]>([
+      { field: "first_name" },
+      { field: "last_name" },
+      { field: "contact_type" },
+    ]);
+  
+    const defaultColDef: ColDef = {
+      flex: 1,
+    };
 
   const onSearch = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -28,7 +63,7 @@ const SearchInput = () => {
 
   return (
     <>
-    <form onSubmit={onSearch} className="flex justify-center w-2/3">
+    <form onSubmit={onSearch} className="flex justify-center w-2/3 pb-5">
       <input
         value={searchQuery || ""}
         onChange={(event) => setSearchQuery(event.target.value)}
@@ -37,6 +72,14 @@ const SearchInput = () => {
       />
     </form>
     <pre>{JSON.stringify(data , null, 2)}</pre>
+    <div style={{ width: "50vw", height: "70vh" }}>
+      <AgGridReact
+        theme={myTheme}
+        rowData={data}
+        columnDefs={colDefs}
+        
+      />
+    </div>
     </>
   );
 };

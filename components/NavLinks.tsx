@@ -23,6 +23,11 @@ const links = [
     icon: DocumentDuplicateIcon,
   },
   {
+    name: "Search LeePa Owners",
+    href: "/leepa",
+    icon: DocumentDuplicateIcon,
+  },
+  {
     name: "Units by Building",
     href: "/building/1",
     icon: DocumentDuplicateIcon,
