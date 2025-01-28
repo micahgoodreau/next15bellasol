@@ -69,12 +69,20 @@ export type State =
     }
   }
 
-  export async function getLeepa() {
+  export async function getLeepa(searchString: string) {
     const supabase = await createClient();
+
+    if (searchString == "") {
+      const { data: lResults, error } = await supabase
+      .from("leepa_owners")
+      .select(`property_id, owner_name, address1, address2, address3, address4, country, unit_number`)
+      .order("unit_number", { ascending: false });
+      return lResults;
+    }
     const { data: sResults, error } = await supabase
     .from("leepa_owners")
     .select(`property_id, owner_name, address1, address2, address3, address4, country, unit_number`)
-    //.or(`owner_name.ilike.%${searchString}%, address1.ilike.%${searchString}%, country.ilike.%${searchString}%`)
+    .or(`owner_name.ilike.%${searchString}%, address1.ilike.%${searchString}%, country.ilike.%${searchString}%`)
     .order("unit_number", { ascending: true });
 
     return sResults;

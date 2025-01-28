@@ -2,7 +2,7 @@
 
 import { getLeepa } from "@/app/actions";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community'; 
 import type { ColDef } from "ag-grid-community";
@@ -37,38 +37,58 @@ const myTheme = themeQuartz.withParams({
 
 const Page = () => {
     const [data, setData] = useState<LeepaOwner[]  | null>();
+    const search = useSearchParams();
+    const [searchQuery, setSearchQuery] = useState<string | null>(
+      search ? search.get("q") : ""
+    );
 
     // Column Definitions: Defines & controls grid columns.
     const [colDefs, setColDefs] = useState<ColDef<LeepaOwner>[]>([
-        { field: "unit_number" },
+        { field: "unit_number", width: 100 },
         { field: "owner_name" },
-        { field: "address1", editable: true },
-        { field: "address2" },
-        { field: "address3" },
-        { field: "address4" },
+        { field: "address1", headerName: "", editable: true },
+        { field: "address3", headerName: "Address Line2" },
+        { field: "address4", headerName: "City State Zip" },
         { field: "country", editable: true },
     ]);
 
     const defaultColDef: ColDef = {
       flex: 1,
     };
-    const onSearch = async () => {
-    
-
-        const searchResults = await getLeepa();
+    const initialSearch = async () => {
+        const searchResults = await getLeepa("");
         setData(searchResults);
-    
+    };
+
+    const onSearch = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        if (typeof searchQuery !== "string") {
+            return;
+        }
+        const searchResults = await getLeepa(searchQuery || "");
+        setData(searchResults);
+
         //const encodedSearchQuery = encodeURI(searchQuery);
         //router.push(`/contact/search?q=${encodedSearchQuery}`);
         return;
-      };
-        useEffect(() => {
-            onSearch();
-        }, []);
+    };
+
+    useEffect(() => {
+        initialSearch();
+    }, []);
   return (
     <>
-
+    <form onSubmit={onSearch} className="flex justify-center w-2/3 pb-5">
+      <input
+        value={searchQuery || ""}
+        onChange={(event) => setSearchQuery(event.target.value)}
+        className="px-5 py-1 w-2/3 sm:px-5 sm:py-3 flex-1 text-zinc-200 bg-zinc-800 focus:bg-black rounded-full focus:outline-none focus:ring-[1px] focus:ring-green-700 placeholder:text-zinc-400"
+        placeholder="What are you looking for?"
+      />
+    </form>
     {/* <pre>{JSON.stringify(data , null, 2)}</pre> */}
+    <Suspense fallback={<div>Loading...</div>}>
     <div style={{ width: "50vw", height: "70vh" }}>
       <AgGridReact
         theme={myTheme}
@@ -77,6 +97,7 @@ const Page = () => {
         
       />
     </div>
+    </Suspense>
     </>
   );
 };
