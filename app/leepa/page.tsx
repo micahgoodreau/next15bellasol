@@ -78,7 +78,6 @@ const Page = () => {
         initialSearch();
     }, []);
   return (
-    <>
     <Suspense fallback={<div>Loading...</div>}>
     <form onSubmit={onSearch} className="flex justify-center w-2/3 pb-5">
       <input
@@ -88,9 +87,7 @@ const Page = () => {
         placeholder="What are you looking for?"
       />
     </form>
-    </Suspense>
     {/* <pre>{JSON.stringify(data , null, 2)}</pre> */}
-    <Suspense fallback={<div>Loading...</div>}>
     <div style={{ width: "50vw", height: "70vh" }}>
       <AgGridReact
         theme={myTheme}
@@ -100,7 +97,6 @@ const Page = () => {
       />
     </div>
     </Suspense>
-    </>
   );
 };
 
