@@ -71,7 +71,7 @@ const SearchInput = () => {
         placeholder="What are you looking for?"
       />
     </form>
-    <pre>{JSON.stringify(data , null, 2)}</pre>
+    {/* <pre>{JSON.stringify(data , null, 2)}</pre>*/}
     <Suspense fallback={<div>Loading...</div>}>
     <div style={{ width: "50vw", height: "70vh" }}>
       <AgGridReact

@@ -1,9 +1,5 @@
-import { getContacts } from "@/app/actions";
-import Contacts from "@/components/Contacts";
-import GridExample from "@/components/GridExample";
 import SearchInput from "@/components/SearchInput";
-import { createClient } from "@/utils/supabase/client";
-import { useState, useEffect } from "react";
+import { Suspense } from "react";
 
 
 // Row Data Interface
@@ -19,7 +15,9 @@ export default async function Page() {
        return (
         <div>
             <h1>Contact List</h1>
+            <Suspense fallback={<div>Loading...</div>}>
             <SearchInput />
+            </Suspense>
         </div>
       );
 }
