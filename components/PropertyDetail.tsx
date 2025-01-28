@@ -139,7 +139,7 @@ export default async function PropertyDetail(props: any) {
               <div>
                 <span className="">
                   LeePA data last updated:{" "}
-                  {leepa_owners?.updated_at.slice(0, 10)}
+                  {leepa_owners?.updated_at?.slice(0, 10)}
                 </span>
               </div>
               <div className="w-full">
