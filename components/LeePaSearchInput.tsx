@@ -1,6 +1,6 @@
 "use client";
 
-import { getContacts } from "@/app/actions";
+import { getContacts, getLeepa } from "@/app/actions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
@@ -12,13 +12,18 @@ import type { ColDef } from "ag-grid-community";
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 // Row Data Interface
-interface Contact {
-  id: any;
-  first_name: any | null;
-  last_name: any | null;
-  contact_type: any | null;
+interface LeepaOwner {
+  property_id: string;
+  owner_name: string | null;
+  unit_number: number | null;
+  address1: string | null;
+  address2: string | null;
+  address3: string | null;
+  address4: string | null;
+    country: string | null;
+
 };
-interface IResults { contacts: Contact[]};
+interface IResults { leepaowners: LeepaOwner[]};
 
 const myTheme = themeQuartz.withParams({
   "spacing": 4,
@@ -30,18 +35,22 @@ const myTheme = themeQuartz.withParams({
 });
 
 const LeePaSearchInput = () => {
-  const [data, setData] = useState<{ id: any; first_name: any; last_name: any; contact_type: any; }[]  | null>();
+  const [data, setData] = useState<LeepaOwner[]  | null>();
   const search = useSearchParams();
   const [searchQuery, setSearchQuery] = useState<string | null>(
     search ? search.get("q") : ""
   );
   const router = useRouter();
     // Column Definitions: Defines & controls grid columns.
-    const [colDefs, setColDefs] = useState<ColDef<Contact>[]>([
-      { field: "first_name" },
-      { field: "last_name" },
-      { field: "contact_type" },
-    ]);
+    const [colDefs, setColDefs] = useState<ColDef<LeepaOwner>[]>([
+      { field: "unit_number", width: 100 },
+      { field: "owner_name" },
+      { field: "address1", headerName: "", editable: true },
+      { field: "address3", headerName: "Address Line2" },
+      { field: "address4", headerName: "City State Zip" },
+      { field: "country", editable: true },
+  ]);
+
   
     const defaultColDef: ColDef = {
       flex: 1,
@@ -53,7 +62,7 @@ const LeePaSearchInput = () => {
     if (typeof searchQuery !== "string") {
       return;
     }
-    const searchResults = await getContacts(searchQuery || "");
+    const searchResults = await getLeepa(searchQuery || "");
     setData(searchResults);
 
     //const encodedSearchQuery = encodeURI(searchQuery);

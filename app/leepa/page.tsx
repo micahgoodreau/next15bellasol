@@ -1,4 +1,4 @@
-import SearchInput from "@/components/SearchInput";
+import LeePaSearchInput from "@/components/LeePaSearchInput";
 import { Suspense } from "react";
 
 
@@ -8,7 +8,7 @@ export default async function Page() {
         <div>
             <h1>LeePA List</h1>
             <Suspense fallback={<div>Loading...</div>}>
-            <SearchInput />
+            <LeePaSearchInput />
             </Suspense>
         </div>
       );
