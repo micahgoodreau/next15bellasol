@@ -2,7 +2,7 @@
 
 import { getContacts } from "@/app/actions";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community'; 
 import type { ColDef } from "ag-grid-community";
@@ -72,6 +72,7 @@ const SearchInput = () => {
       />
     </form>
     <pre>{JSON.stringify(data , null, 2)}</pre>
+    <Suspense fallback={<div>Loading...</div>}>
     <div style={{ width: "50vw", height: "70vh" }}>
       <AgGridReact
         theme={myTheme}
@@ -80,6 +81,7 @@ const SearchInput = () => {
         
       />
     </div>
+    </Suspense>
     </>
   );
 };
