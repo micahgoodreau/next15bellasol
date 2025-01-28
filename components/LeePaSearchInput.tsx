@@ -2,7 +2,7 @@
 
 import { getContacts, getLeepa } from "@/app/actions";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community'; 
 import type { ColDef } from "ag-grid-community";
@@ -55,6 +55,11 @@ const LeePaSearchInput = () => {
     const defaultColDef: ColDef = {
       flex: 1,
     };
+    const initialSearch = async () => {
+      const searchResults = await getLeepa("");
+      setData(searchResults);
+      return;
+  };
 
   const onSearch = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -69,7 +74,9 @@ const LeePaSearchInput = () => {
     //router.push(`/contact/search?q=${encodedSearchQuery}`);
     return;
   };
-
+  useEffect(() => {
+    initialSearch();
+}, []);
   return (
     <>
     <form onSubmit={onSearch} className="flex justify-center w-2/3 pb-5">
