@@ -115,3 +115,8 @@ git push -u origin main
 git remote add origin https://github.com/micahgoodreau/next15bellasol.git
 git branch -M main
 git push -u origin main
+
+
+## cmd
+
+npx supabase gen types typescript --project-id "feewkiixvpzerehrnbic" --schema public > database.types.ts

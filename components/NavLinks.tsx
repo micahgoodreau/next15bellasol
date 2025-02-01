@@ -23,6 +23,21 @@ const links = [
     icon: DocumentDuplicateIcon,
   },
   {
+    name: "Search Property Managers",
+    href: "/propertymanagers/search",
+    icon: DocumentDuplicateIcon,
+  },
+  {
+    name: "Search Parking Permits",
+    href: "/parking/permits/search",
+    icon: DocumentDuplicateIcon,
+  },
+  {
+    name: "Add Parking Permits",
+    href: "/parking/permits/add",
+    icon: DocumentDuplicateIcon,
+  },
+  {
     name: "Search LeePa Owners",
     href: "/leepa",
     icon: DocumentDuplicateIcon,

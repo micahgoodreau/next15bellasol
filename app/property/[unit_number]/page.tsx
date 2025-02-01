@@ -27,6 +27,9 @@ export default async function Page({
       id: string;
       unit_number: number;
       building_number: number;
+      street_address_1: string;
+      folio: string;
+      association_number: string;
       leepa_owners: LeepaOwner;
       contacts: Contact[];
     }
@@ -43,6 +46,7 @@ export default async function Page({
       first_name: string;
       last_name: string;
       contact_type: string;
+      active: boolean;
       phone_numbers: Phone[];
       email_addresses: Email[];
     }
@@ -59,7 +63,7 @@ export default async function Page({
     const { data: propertyDetail } = await supabase
       .from("properties")
       .select(
-        `id, unit_number, building_number, leepa_owners(owner_name, address1, address2, address3, address4, country), contacts(id, first_name, last_name, contact_type, phone_numbers(phone_number, phone_type), email_addresses(id, email_address))`
+        `id, unit_number, building_number, street_address_1, association_number, folio, leepa_owners(owner_name, address1, address2, address3, address4, country), contacts(id, first_name, last_name, contact_type, active, phone_numbers(phone_number, phone_type), email_addresses(id, email_address))`
       )
       .match({ unit_number: unitNumber })
       .returns<Dbresults[]>()
@@ -69,15 +73,39 @@ export default async function Page({
   
     return (
         <>
-        <h1>Unit Details</h1>
+        <div className="p-2 bg-gray-700 text-white rounded-sm">
+        <p className="pb-2 font-bold">Unit Details</p>
+        <p>Unit {propertyDetail.unit_number}</p>
+        <p>Association {propertyDetail.association_number}</p>
+        <p>Building {propertyDetail.building_number}</p>
+        <p>Street Address {propertyDetail.street_address_1}</p>
+        </div>
+        <div className="p-2 bg-gray-700 text-white rounded-sm">
+        <p className="pb-2 font-bold">LeePA Owner Details</p>
+        <p>{propertyDetail.leepa_owners.owner_name}</p>
+        <p>{propertyDetail.leepa_owners.address1}</p>
+        <p>{propertyDetail.leepa_owners.address2}</p>
+        <p>{propertyDetail.leepa_owners.address3}</p>
+        <p>{propertyDetail.leepa_owners.address4}</p>
+        <p className="pb-2">{propertyDetail.leepa_owners.country}</p>
+        <span>
+                  <Link
+                    href={`https://www.leepa.org/Display/DisplayParcel.aspx?FolioID=${propertyDetail.folio}`}
+                  >
+                    View on LeePA
+                  </Link>
+                </span>
+        </div>
         <AddContactForm property_id={propertyDetail.id} />
         {/*<pre>{JSON.stringify(propertyDetail , null, 2)}</pre>*/}
-        {propertyDetail.contacts?.map((contact) => (<div key={contact.id}>
+        {propertyDetail.contacts?.map((contact) => (
+          contact.active ?
+          <div key={contact.id}>
 
           <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
-          {contact.contact_type} {contact.first_name} {contact.last_name} <Link href={`/contact/${contact.id}`}>Edit</Link>
+          {contact.active ? "Active" : "Deactivated"} {contact.contact_type} {contact.first_name} {contact.last_name} <Link href={`/contact/${contact.id}`}>Edit</Link>
             </p>
-            <Table key={contact.id}>
+            <Table>
 
               <TableBody>
                 {contact?.phone_numbers?.map((phone) => (
@@ -94,7 +122,7 @@ export default async function Page({
                 ))}
               </TableBody>
             </Table>
-        </div>))}
+        </div>: null))}
 
 
         </>

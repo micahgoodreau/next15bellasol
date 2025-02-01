@@ -13,6 +13,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { Button } from "./ui/button";
 import { PencilIcon } from "lucide-react";
+import { Database } from "@/database.types";
+
+
 
 export default async function PropertyDetail(props: any) {
   const supabase = await createClient();
@@ -80,7 +83,7 @@ export default async function PropertyDetail(props: any) {
   const { data: properties } = await supabase
     .from("properties")
     .select(
-      `id, unit_number, folio, building_number, street_address_1, association_number, leases(id, start_date, end_date, lease_notes, contacts(id, first_name, last_name)), contacts(id, first_name, last_name, contact_type, phone_numbers(id, phone_number, phone_type), email_addresses(id, email_address))`
+      `id, unit_number, folio, building_number, street_address_1, association_number, leases(id, start_date, end_date, lease_notes, contacts(id, first_name, last_name)), contacts(id, first_name, last_name, contact_type, active, phone_numbers(id, phone_number, phone_type), email_addresses(id, email_address))`
     )
     .match({ id: props.property_id })
     .single();
@@ -158,7 +161,7 @@ export default async function PropertyDetail(props: any) {
               Contacts:
             </p>
             {properties?.contacts.map((contact) => (
-              <div
+              contact.active ? <div
                 className="mb-2 border-b border-black bg-gray-500"
                 key={contact.id}
               >
@@ -203,7 +206,7 @@ export default async function PropertyDetail(props: any) {
                 <div className="p-2">
 
                 </div>
-              </div>
+              </div> : null
             ))}
             <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
               Lease Info:

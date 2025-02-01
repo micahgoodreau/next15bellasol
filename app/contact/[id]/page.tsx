@@ -15,6 +15,21 @@ import {
   } from "@/components/ui/table";
   import { TrashIcon } from "@heroicons/react/24/outline";
 import { revalidatePath } from "next/cache";
+import { TestForm } from "@/components/test-form";
+import { Toaster } from "@/components/ui/toaster";
+import { EditContactForm } from "@/components/edit-contact-form";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button";
+
 
 export default async function Page({
   params,
@@ -25,12 +40,26 @@ export default async function Page({
     
     const supabase = await createClient();
 
-
+    type IContactType = "OWNER" | "OWNER GUEST/RELATIVE" | "TENANT" | "PROPERTY MANAGER";
+    type IContact = {
+      contact_id: string;
+      contact_type: IContactType;
+      first_name: string;
+      last_name: string;
+      business_name: string;
+    };
+    
     interface Dbresults {
       id: string;
       first_name: string;
       last_name: string;
       contact_type: string;
+      business_name: string;
+      active: boolean;
+      created_at: string;
+      created_by: string;
+      updated_at: string;
+      updated_by: string;
       phone_numbers: Phone[];
       email_addresses: Email[];
     }
@@ -44,14 +73,23 @@ export default async function Page({
         email_address: string;
     }
     const contactId = (await params).id;
-    const { data: contact } = await supabase
+    const { data: contactData } = await supabase
       .from("contacts")
       .select(
-        `id, first_name, last_name, contact_type, phone_numbers(id, phone_number, phone_type), email_addresses(id, email_address)`
+        `id, first_name, last_name, contact_type, business_name, active, created_at, created_by, updated_at, updated_by, phone_numbers(id, phone_number, phone_type), email_addresses(id, email_address)`
       )
       .match({ id: contactId })
       .returns<Dbresults[]>()
       .single();
+
+      const contact = {
+        contact_id: contactData?.id,
+        first_name: contactData?.first_name,
+        last_name: contactData?.last_name, 
+        contact_type: contactData?.contact_type as IContactType, 
+        business_name: contactData?.business_name,
+      } as IContact;
+
       const deletePhoneNumber = async (id: string) => {
         "use server";
         //const requestUrl = new URL(request.url)
@@ -101,19 +139,67 @@ export default async function Page({
     
         return; //redirect(`/dashbard/building/1/unit/${var_property_id}`);
       };
+      const deactivateContact = async (id: string) => {
+        "use server";
+        //const requestUrl = new URL(request.url)
     
+        const supabase = await createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        const var_created_by = user?.id;
+        //console.log(user, var_created_by);
+        const { error } = await supabase
+          .from("contacts")
+          .update({ active: false, updated_at: new Date().toISOString() })
+          .eq("id", id);
+        //console.log(id, error);
+        revalidatePath("/");
+    
+        if (error) {
+          console.log(error);
+          return redirect(`/login/login?error=Could not create contact`);
+        }
+    
+        return; //redirect(`/dashbard/building/1/unit/${var_property_id}`);
+      };
       
-    if (contact === null) return <>No contact found for id: {contactId}</>;
+    if (contactData === null) return <>No contact found for id: {contactId}</>;
   
     return (
         <>
           <div className="border-b border-black mb-2">
-            <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
-              Contact Details
-            </p>
-        <p><b>First Name:</b> {contact.first_name}</p>
-        <p><b>Last Name:</b>  {contact.last_name}</p>
-        <p><b>Contact Type:</b> {contact.contact_type}</p>
+            <div className="w-full flex flex-row justify-between align-middle p-2 bg-gray-700 text-white rounded-sm">
+              <div>Contact Details  -- Status: {contactData.active ? "Active" : "Deactivated"}</div>
+              <div>
+              <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="destructive">Delete</Button>
+              </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
+                      This action cannot be undone. This will permanently delete your account
+                      and remove your data from our servers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                  <form action={deactivateContact.bind(null, contactData?.id)}>
+                    <Button variant={"destructive"} type="submit">Delete Contact</Button>
+                  </form>
+                  <DialogClose asChild>
+                    <Button type="button" variant="secondary">
+                      Cancel
+                    </Button>
+                  </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              </div>
+            </div>
+          <EditContactForm contact = {contact} />
+
         </div>
 
         
@@ -126,7 +212,7 @@ export default async function Page({
             <Table>
 
               <TableBody>
-                {contact.email_addresses?.map((email) => (
+                {contactData?.email_addresses?.map((email) => (
                   <TableRow key={email.id}>
                     <TableCell> {email.email_address}</TableCell>
                     <TableCell><form action={deleteEmail.bind(null, email.id)}>
@@ -138,7 +224,7 @@ export default async function Page({
                 ))}
               </TableBody>
             </Table>
-            <AddEmailForm contact_id={contact.id} />
+            <AddEmailForm contact_id={contactData?.id} />
           </div>
           <div className="border-b border-black mb-2">
             <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
@@ -147,7 +233,7 @@ export default async function Page({
             <Table>
 
               <TableBody>
-                {contact?.phone_numbers?.map((phone) => (
+                {contactData?.phone_numbers?.map((phone) => (
                   <TableRow key={phone.id}>
                     <TableCell> {phone.phone_type}</TableCell>
                     <TableCell> {phone.phone_number}</TableCell>
@@ -160,8 +246,9 @@ export default async function Page({
                 ))}
               </TableBody>
             </Table>
-            <AddPhoneForm contact_id={contact.id} />
+            <AddPhoneForm contact_id={contactData?.id} />
           </div>
+          <Toaster />
         </>
     );
 }

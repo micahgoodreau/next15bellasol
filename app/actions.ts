@@ -7,8 +7,9 @@ import { redirect } from "next/navigation";
 import { z, ZodError } from "zod";
 import { createServerAction } from "zsa";
 import { revalidatePath } from "next/cache";
-import { addContactFormSchema, addEmailAddressFormSchema, addPhoneNumberFormSchema, addressSchema } from "./validation";
+import { addContactFormSchema, addEmailAddressFormSchema, addParkingPermitFormSchema, addPhoneNumberFormSchema, addressSchema, editContactFormSchema } from "./validation";
 import { ActionResponse, AddressFormData } from "@/types";
+import { error } from "console";
 
 
 
@@ -89,7 +90,27 @@ export type State =
     
   }
   
-  
+  export async function getPropertyManagers(searchString: string) {
+    const supabase = await createClient();
+    if (searchString == "") {
+      const { data: lResults, error } = await supabase
+      .from("contacts")
+      .select(`id, first_name, last_name, contact_type, properties(id, unit_number)`)
+      .match({ contact_type: "PROPERTY MANAGER" })
+      .order("last_name", { ascending: false });
+      return lResults;
+    }
+    const { data: sResults, error } = await supabase
+    .from("contacts")
+    .select(`id, first_name, last_name, contact_type, properties(id, unit_number)`)
+    .match({ contact_type: "PROPERTY MANAGER" })
+    .or(`first_name.ilike.%${searchString}%, last_name.ilike.%${searchString}%`)
+    .order("last_name", { ascending: true })
+    .limit(25);
+
+    return sResults;
+    
+  }  
   export async function getContacts(searchString: string) {
     const supabase = await createClient();
     const { data: sResults, error } = await supabase
@@ -101,6 +122,99 @@ export type State =
 
     return sResults;
     
+  }
+
+  export async function getParkingPermits(searchString: string) {
+    const supabase = await createClient();
+
+    if (searchString == "") {
+      const { data: lResults, error } = await supabase
+      .from("parking_permits")
+      .select("*")
+      .order("unit_number", { ascending: false });
+      return lResults;
+    }
+    const { data: sResults, error } = await supabase
+    .from("parking_permits")
+    .select("*")
+    .or(`unit_number.eq.${searchString}, permit_number.eq.${searchString}`)
+    .order("unit_number", { ascending: true });
+
+    console.log(error, sResults);
+    return sResults;
+    
+  }
+
+  export async function addParkingPermit(
+    prevState: State | null,
+    formdata: FormData,
+  ): Promise<State> {
+    console.log(formdata);
+    try {
+      // Artificial delay; don't forget to remove that!
+      //await new Promise((resolve) => setTimeout(resolve, 1000));
+  
+      // Validate our data
+      const { first_name,
+        last_name,
+        contact_type,
+        phone_number,
+        email_address,
+        unit_number,
+        permit_number,
+        vehicle_make,
+        vehicle_model,
+        vehicle_color,
+        vehicle_year,
+        vehicle_plate,
+        vehicle_plate_state, } = addParkingPermitFormSchema.parse(formdata);
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      //const var_created_by = user?.id;
+      const { data, error } = await supabase.from("parking_permits").insert({
+        first_name,
+        last_name,
+        contact_type,
+        phone_number,
+        email_address,
+        unit_number: parseInt(unit_number),
+        permit_number: parseInt(permit_number),
+        vehicle_make,
+        vehicle_model,
+        vehicle_color,
+        vehicle_year,
+        vehicle_plate,
+        vehicle_plate_state,
+        created_by: user?.id
+      });
+      revalidatePath('/');
+      console.log("ERRORS!!", error);
+      console.log("DATA!!", data);
+      return {
+        status: "success",
+        message: `Permit added!`,
+      };
+    } catch (e) {
+      console.log("ERRORS!!", e);
+      // In case of a ZodError (caused by our validation) we're adding issues to our response
+      if (e instanceof ZodError) {
+        return {
+          status: "error",
+          message: "Invalid form data",
+          errors: e.issues.map((issue) => ({
+            path: issue.path.join("."),
+            message: `Server validation: ${issue.message}`,
+          })),
+        };
+      }
+      console.log("ERRORS!!", error);
+      return {
+        status: "error",
+        message: "Something went wrong. Please try again.",
+      };
+    }
   }
 
   export async function addEmail(
@@ -244,7 +358,106 @@ export async function addContact(
     };
   }
 }
+export async function editContact(
+  prevState: State | null,
+  formdata: FormData,
+): Promise<State> {
+  try {
+    // Artificial delay; don't forget to remove that!
+    //await new Promise((resolve) => setTimeout(resolve, 1000));
 
+    // Validate our data
+    console.log(formdata);
+    const { contact_id, first_name, last_name, business_name, contact_type } = editContactFormSchema.parse(formdata);
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    //const var_created_by = user?.id;
+
+    const updated_by = user?.id || "";
+    const { data, error } = await supabase.from("contacts").update( {
+      first_name,
+      last_name,
+      business_name,
+      contact_type,
+      updated_by,
+    }).eq("id", contact_id);
+    console.log(data, error);
+    revalidatePath('/');
+    
+    return {
+      status: "success",
+      message: `Contact updated!`,
+    };
+  } catch (e) {
+    // In case of a ZodError (caused by our validation) we're adding issues to our response
+    console.log("ERRORS!!", e);
+    if (e instanceof ZodError) {
+      return {
+        status: "error",
+        message: "Invalid form data",
+        errors: e.issues.map((issue) => ({
+          path: issue.path.join("."),
+          message: `Server validation: ${issue.message}`,
+        })),
+      };
+    }
+    return {
+      status: "error",
+      message: "Something went wrong. Please try again.",
+    };
+  }
+}
+export async function deactivateContact(
+  prevState: State | null,
+  contact_id: string,
+): Promise<State> {
+  try {
+    // Artificial delay; don't forget to remove that!
+    //await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Validate our data
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    //const var_created_by = user?.id;
+
+    const updated_by = user?.id || "";
+    const { data, error } = await supabase.from("contacts").update( {
+      active: false,
+      updated_by,
+      updated_at: new Date().toISOString(),
+    }).eq("id", contact_id);
+    console.log(data, error);
+    revalidatePath('/');
+    
+    return {
+      status: "success",
+      message: `Contact updated!`,
+    };
+  } catch (e) {
+    // In case of a ZodError (caused by our validation) we're adding issues to our response
+    console.log("ERRORS!!", e);
+    if (e instanceof ZodError) {
+      return {
+        status: "error",
+        message: "Invalid form data",
+        errors: e.issues.map((issue) => ({
+          path: issue.path.join("."),
+          message: `Server validation: ${issue.message}`,
+        })),
+      };
+    }
+    return {
+      status: "error",
+      message: "Something went wrong. Please try again.",
+    };
+  }
+}
 export const incrementNumberAction = createServerAction() 
     .input(z.object({
         number: z.number()
