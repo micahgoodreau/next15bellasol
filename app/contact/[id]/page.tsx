@@ -29,6 +29,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
+import { inter } from "@/components/ui/fonts";
+import { LinkContactPropertyForm } from "@/components/link-contact-property-form";
 
 
 export default async function Page({
@@ -63,6 +65,16 @@ export default async function Page({
       phone_numbers: Phone[];
       email_addresses: Email[];
     }
+    interface Property {
+      id: string;
+      unit_number: string;
+    }
+    interface Property_Contact {
+      id: string;
+      contact_id: string;
+      property_id: string;
+      properties: Property;
+    }
     interface Phone {
       id: string;
       phone_number: string;
@@ -82,6 +94,16 @@ export default async function Page({
       .returns<Dbresults[]>()
       .single();
 
+
+    const { data: linkedPropertiesData } = await supabase
+      .from("property_contact")
+      .select(
+        `property_id, contact_id, properties(id, unit_number)`
+      )
+      .match({ contact_id: contactId })
+      .returns<Property_Contact[]>();
+
+
       const contact = {
         contact_id: contactData?.id,
         first_name: contactData?.first_name,
@@ -95,21 +117,14 @@ export default async function Page({
         //const requestUrl = new URL(request.url)
     
         const supabase = await createClient();
-        // await supabase.auth.signOut()
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        const var_created_by = user?.id;
-        //console.log(user, var_created_by);
+
         const { error } = await supabase
           .from("phone_numbers")
           .delete()
           .eq("id", id);
-        //console.log(id, error);
         revalidatePath("/");
     
         if (error) {
-          console.log(error);
           return redirect(`/login/login?error=Could not create contact`);
         }
     
@@ -120,20 +135,14 @@ export default async function Page({
         //const requestUrl = new URL(request.url)
     
         const supabase = await createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        const var_created_by = user?.id;
-        //console.log(user, var_created_by);
+
         const { error } = await supabase
           .from("email_addresses")
           .delete()
           .eq("id", id);
-        //console.log(id, error);
         revalidatePath("/");
     
         if (error) {
-          console.log(error);
           return redirect(`/login/login?error=Could not create contact`);
         }
     
@@ -147,17 +156,34 @@ export default async function Page({
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        const var_created_by = user?.id;
-        //console.log(user, var_created_by);
+
         const { error } = await supabase
           .from("contacts")
-          .update({ active: false, updated_at: new Date().toISOString() })
+          .update({ active: false, updated_by: user?.id, updated_at: new Date().toISOString() })
           .eq("id", id);
-        //console.log(id, error);
         revalidatePath("/");
     
         if (error) {
-          console.log(error);
+          return redirect(`/login/login?error=Could not create contact`);
+        }
+    
+        return; //redirect(`/dashbard/building/1/unit/${var_property_id}`);
+      };
+
+      const unlinkProperty = async (property_id: string) => {
+        "use server";
+        //const requestUrl = new URL(request.url)
+    
+        const supabase = await createClient();
+
+        const { error } = await supabase
+          .from("property_contact")
+          .delete()
+          .match({ property_id: property_id })
+          .match({ contact_id: contactData?.id });
+        revalidatePath("/");
+    
+        if (error) {
           return redirect(`/login/login?error=Could not create contact`);
         }
     
@@ -205,6 +231,30 @@ export default async function Page({
         
         
         {/*<pre>{JSON.stringify(contact , null, 2)}</pre>*/}
+
+        <div className="border-b border-black mb-2">
+            <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
+              Linked Properties
+            </p>
+            <Table>
+
+              <TableBody>
+                {linkedPropertiesData?.map((property) => (
+                  
+                  <TableRow key={property.property_id}>
+                    <TableCell> {property.properties.unit_number}</TableCell>
+                    <TableCell><form action={unlinkProperty.bind(null, property.properties.id)}>
+                      <button className="mr-4">
+                        <TrashIcon className="h-4 w-4 text-red-700" />
+                      </button>
+                    </form></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <LinkContactPropertyForm contact_id={contactData?.id} />
+          </div>
+
         <div className="border-b border-black mb-2">
             <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
               Email Addresses

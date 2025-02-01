@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { z, ZodError } from "zod";
 import { createServerAction } from "zsa";
 import { revalidatePath } from "next/cache";
-import { addContactFormSchema, addEmailAddressFormSchema, addParkingPermitFormSchema, addPhoneNumberFormSchema, addressSchema, editContactFormSchema } from "./validation";
+import { addContactFormSchema, addEmailAddressFormSchema, addParkingPermitFormSchema, addPhoneNumberFormSchema, addressSchema, editContactFormSchema, linkContactPropertyFormSchema } from "./validation";
 import { ActionResponse, AddressFormData } from "@/types";
 import { error } from "console";
 
@@ -216,6 +216,66 @@ export type State =
       };
     }
   }
+
+
+  export async function linkContactProperty(
+    prevState: State | null,
+    formdata: FormData,
+  ): Promise<State> {
+    try {
+      // Artificial delay; don't forget to remove that!
+      //await new Promise((resolve) => setTimeout(resolve, 1000));
+  
+      // Validate our data
+      const { unit_number , contact_id } = linkContactPropertyFormSchema.parse(formdata);
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      //const var_created_by = user?.id;
+
+      // look up property_id from unit_number
+      const { data: property, error: propertyLookupError } = await supabase.from("properties").select("id").eq("unit_number", unit_number).single();
+      if (propertyLookupError || !property || !user) {
+        console.log("ERRORS!!", propertyLookupError);
+        console.log("DATA!!", property);
+        return {
+          status: "error",
+          message: "Invalid form data",
+          errors: [{ path: "unit_number", message: "Unit number not found" }],
+        };
+      }
+      const { data, error } = await supabase.from("property_contact").insert({
+        property_id: property.id,
+        contact_id: contact_id,
+        created_by: user?.id,
+        created_at: new Date().toISOString(),
+      });
+      revalidatePath('/');
+      
+      return {
+        status: "success",
+        message: `Welcome, Contact linked to unit ${unit_number}!`,
+      };
+    } catch (e) {
+      // In case of a ZodError (caused by our validation) we're adding issues to our response
+      if (e instanceof ZodError) {
+        return {
+          status: "error",
+          message: "Invalid form data",
+          errors: e.issues.map((issue) => ({
+            path: issue.path.join("."),
+            message: `Server validation: ${issue.message}`,
+          })),
+        };
+      }
+      return {
+        status: "error",
+        message: "Something went wrong. Please try again.",
+      };
+    }
+  }
+
 
   export async function addEmail(
     prevState: State | null,

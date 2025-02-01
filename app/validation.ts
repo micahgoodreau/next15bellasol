@@ -6,6 +6,11 @@ export const addEmailAddressFormSchema = zfd.formData({
   email_address: zfd.text(z.string().min(2, "Too short").max(50, "Too long")),
 });
 
+export const linkContactPropertyFormSchema = zfd.formData({
+  contact_id: zfd.text(),
+  unit_number: zfd.text(z.string().min(3, "Too short").max(4, "Too long")),
+});
+
 export const addPhoneNumberFormSchema = zfd.formData({
   contact_id: zfd.text(),
   phone_number: zfd.text(z.string().min(2, "Too short").max(20, "Too long")),
