@@ -7,9 +7,10 @@ import { redirect } from "next/navigation";
 import { z, ZodError } from "zod";
 import { createServerAction } from "zsa";
 import { revalidatePath } from "next/cache";
-import { addContactFormSchema, addEmailAddressFormSchema, addParkingPermitFormSchema, addPhoneNumberFormSchema, addressSchema, editContactFormSchema, linkContactPropertyFormSchema } from "./validation";
-import { ActionResponse, AddressFormData } from "@/types";
-import { error } from "console";
+import { addContactFormSchema, addEmailAddressFormSchema, addParkingPermitFormSchema, addPhoneNumberFormSchema, addressSchema, addTestFormSchema, editContactFormSchema, linkContactPropertyFormSchema, testSchema } from "./validation";
+import { ActionResponse, ActionResponseTestForm, AddressFormData, TestFormData } from "@/types";
+import { Console, error } from "console";
+import { toast } from "@/hooks/use-toast";
 
 
 
@@ -30,6 +31,45 @@ export type State =
     }
   | null;
 
+  export async function addTest(prevState: ActionResponseTestForm | null, formData: FormData): Promise<ActionResponseTestForm> {
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+  
+    try {
+      const rawData: TestFormData = {
+        first_name: formData.get('first_name') as string,
+        last_name: formData.get('last_name') as string,
+        business_name: formData.get('business_name') as string,
+        contact_type: formData.get('contact_type') as string,
+        property_id: formData.get('property_id') as string,
+      }
+  
+      // Validate the form data
+      const validatedData = testSchema.safeParse(rawData)
+  
+      if (!validatedData.success) {
+        toast({ title: 'Form submitted successfully!', variant: 'default' });
+        return {
+          success: false,
+          message: 'Please fix the errors in the form',
+          errors: validatedData.error.flatten().fieldErrors,
+        }
+      }
+  
+      // Here you would typically save the address to your database
+      console.log('Test Form submitted:', validatedData.data)
+  
+      return {
+        success: true,
+        message: 'Address saved successfully!',
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: 'An unexpected error occurred',
+      }
+    }
+  }
   export async function submitAddress(prevState: ActionResponse | null, formData: FormData): Promise<ActionResponse> {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -90,6 +130,63 @@ export type State =
     
   }
   
+  export async function getParkingPermitRequests(searchString: string) {
+    const supabase = await createClient();
+
+    if (searchString == "") {
+      const { data: lResults, error } = await supabase
+      .from("parking_permit_requests")
+      .select(`id,
+        first_name,
+        last_name,
+        unit_number,
+        contact_phone,
+        contact_email,
+        vehicle_make,
+        vehicle_model,
+        vehicle_color,
+        vehicle_year,
+        vehicle_plate_number,
+        vehicle_plate_state,
+        created_at,
+        updated_at,
+        updated_by,
+              request_notes,
+      admin_notes,
+      permit_number,
+      created_at,
+        permit_status`)
+        .or(`permit_status.ilike.%NEW REQUEST%, permit_status.ilike.%PENDING%`)
+      .order("permit_status", { ascending: false });
+      return lResults;
+    }
+    const { data: sResults, error } = await supabase
+    .from("parking_permit_requests")
+    .select(`id,
+      first_name,
+      last_name,
+      unit_number,
+      contact_phone,
+      contact_email,
+      vehicle_make,
+      vehicle_model,
+      vehicle_color,
+      vehicle_year,
+      vehicle_plate_number,
+      vehicle_plate_state,
+      updated_at,
+      updated_by,
+      request_notes,
+      admin_notes,
+      permit_number,
+      created_at,
+      permit_status`)
+    .or(`first_name.ilike.%${searchString}%, last_name.ilike.%${searchString}%, unit_number.ilike.%${searchString}%, permit_status.ilike.%${searchString}%`)
+    .order("unit_number", { ascending: true });
+
+    return sResults;
+    
+  }
   export async function getPropertyManagers(searchString: string) {
     const supabase = await createClient();
     if (searchString == "") {
@@ -179,8 +276,8 @@ export type State =
         contact_type,
         phone_number,
         email_address,
-        unit_number: parseInt(unit_number),
-        permit_number: parseInt(permit_number),
+        unit_number,
+        permit_number,
         vehicle_make,
         vehicle_model,
         vehicle_color,
@@ -529,7 +626,33 @@ export const incrementNumberAction = createServerAction()
         return input.number + 1;
     });
 
-    
+export const approveParkingRequestAction = createServerAction() 
+  .input(z.object({
+      permit_number: z.string(),
+      permit_status: z.string(),
+      permit_request_id: z.number()
+  }))
+  .handler(async ({ input }) => {
+      console.log(input);
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      //const var_created_by = user?.id;
+  
+      const updated_by = user?.id || "";
+      const { data, error } = await supabase.from("parking_permit_requests").update( {
+        permit_status: input.permit_status,
+        permit_number: input.permit_number,
+        updated_by: user?.id,
+        updated_at: new Date().toISOString(),
+      }).eq("id", input.permit_request_id);
+
+      console.log(data, error);
+      revalidatePath('/parkingpermitrequests/[id]', 'page');
+      return;
+  });
+  
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();

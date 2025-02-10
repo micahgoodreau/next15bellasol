@@ -119,4 +119,5 @@ git push -u origin main
 
 ## cmd
 
-npx supabase gen types typescript --project-id "feewkiixvpzerehrnbic" --schema public > database.types.ts
+supabase gen types typescript --project-id "feewkiixvpzerehrnbic" --schema public > database.types.ts
+npx shadcn@2.1.8 add alert-dialog

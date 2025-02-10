@@ -38,6 +38,11 @@ const links = [
     icon: DocumentDuplicateIcon,
   },
   {
+    name: "Parking Permit Requests to Approve",
+    href: "/parkingpermitrequests",
+    icon: DocumentDuplicateIcon,
+  },
+  {
     name: "Search LeePa Owners",
     href: "/leepa",
     icon: DocumentDuplicateIcon,
@@ -45,6 +50,22 @@ const links = [
   {
     name: "Units by Building",
     href: "/building/1",
+    icon: DocumentDuplicateIcon,
+  },
+  {
+    name: "Water Meters",
+    href: "/watermeters",
+    icon: DocumentDuplicateIcon,
+  },
+  {
+    name: "Street Lights List",
+    href: "/lights",
+    icon: DocumentDuplicateIcon,
+  },
+  {
+    name: "Street Lights Map",
+    href: "https://www.arcgis.com/apps/mapviewer/index.html?webmap=47399985b1254ce6b6f03cc6c4fb7a05",
+    target: "_blank",
     icon: DocumentDuplicateIcon,
   },
 ];
@@ -59,6 +80,7 @@ export default function NavLinks() {
           <Link
             key={link.name}
             href={link.href}
+            target={link.target}
             className={clsx(
               "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-gray-800 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
               {

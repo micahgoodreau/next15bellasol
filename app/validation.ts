@@ -49,14 +49,39 @@ export const addParkingPermitFormSchema = zfd.formData({
   unit_number: zfd.text(),
   first_name: zfd.text(z.string().min(2, "Too short").max(20, "Too long")),
   last_name: zfd.text(z.string().min(2, "Too short").max(20, "Too long")),
-  contact_type: zfd.text(),
-  phone_number: zfd.text(),
-  email_address: zfd.text(),
+  contact_type: zfd.text().nullable(),
+  phone_number: zfd.text().nullable(),
+  email_address: zfd.text().nullable(),
   permit_number: zfd.text(),
-  vehicle_make: zfd.text(),
-  vehicle_model: zfd.text(),
-  vehicle_color: zfd.text(),
-  vehicle_year: zfd.text(),
+  vehicle_make: zfd.text().nullable(),
+  vehicle_model: zfd.text().nullable(),
+  vehicle_color: zfd.text().nullable(),
+  vehicle_year: zfd.text().nullable(),
   vehicle_plate: zfd.text(),
   vehicle_plate_state: zfd.text(),
+});
+
+export const addTestFormSchema = z.object({
+  contact_type: z.union([
+    z.literal("OWNER"),
+    z.literal("OWNER GUEST/RELATIVE"),
+    z.literal("TENANT"),
+    z.literal("PROPERTY MANAGER"),
+  ]),
+  first_name: z.string().min(2, {
+    message: "First name must be at least 2 characters.",
+  }),
+  last_name: z.string().min(2, {
+    message: "Last name must be at least 2 characters.",
+  }),
+  business_name: z.string(),
+  property_id: z.string(),
+})
+
+export const testSchema = z.object({
+  first_name: z.string().min(1, 'Street address is required'),
+  last_name: z.string().optional(),
+  business_name: z.string().min(1, 'City is required'),
+  contact_type: z.string().min(1, 'State is required'),
+  property_id: z.string().min(5, 'ZIP code must be at least 5 characters'),
 });

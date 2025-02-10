@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useActionState, useEffect } from "react";
 import { ErrorMessage } from "@hookform/error-message";
 import { revalidatePath } from "next/cache";
+import { ParkingPermitFromRequest } from "@/types";
 
 // Interface for our form values that drastically improves type safety for our form
 export interface FormValues {
@@ -38,10 +39,12 @@ function FormContent({
   register,
   isValid,
   errors,
+  parkingPermit,
 }: {
   register: UseFormRegister<FormValues>;
   isValid: boolean;
   errors: FieldErrors<FormValues>;
+  parkingPermit?: ParkingPermitFromRequest;
 }) {
   const { pending } = useFormStatus();
 
@@ -149,7 +152,7 @@ function FormContent({
           placeholder="Vehicle Plate State"
           className="mr-2 border border-black text-white flex"
         />
-        <ErrorMessage name="vehicle_plate_state" errors={errors} />
+        <ErrorMessage name="vehicle_plate" errors={errors} />
       </div>
       <input className="flex" type="submit" />
       {pending && <span>Loading...</span>}
@@ -157,7 +160,12 @@ function FormContent({
   );
 }
 
-export function AddParkingPermitForm(props: any) {
+type ParkingPermitFormProps = {
+  onSuccess?: () => void;
+  parkingPermit?: ParkingPermitFromRequest;
+};
+
+export function AddParkingPermitForm(parkingPermitFromRequest?: ParkingPermitFromRequest) {
   const {
     register,
     formState: { isValid, errors },
@@ -195,6 +203,7 @@ export function AddParkingPermitForm(props: any) {
         register={register}
         isValid={isValid}
         errors={errors}
+        parkingPermit={parkingPermitFromRequest}
       />
     </form>
   );

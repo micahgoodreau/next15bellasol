@@ -1,5 +1,5 @@
 import TestDialog from "@/components/test-dialog";
-import { TestForm } from "@/components/test-form";
+import TestForm from "@/components/test-form";
 import { Toaster } from "@/components/ui/toaster";
 
 
@@ -23,7 +23,7 @@ export default function Page() {
         <div>
             <Toaster />
             <TestDialog />
-            <TestForm contact = {contact} property_id="wertyui3456789"/>
+            <TestForm />
         </div>
       );
 }
