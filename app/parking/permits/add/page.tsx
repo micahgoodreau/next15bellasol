@@ -5,7 +5,7 @@ export default function Page() {
 
     return (
         <div>
-            <AddParkingPermitForm />
+            Add Parking Permit
         </div>
       );
 }
