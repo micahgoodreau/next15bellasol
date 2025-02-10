@@ -39,17 +39,6 @@ export default async function Page({
     if (!requestData) {
         return <div>Request not found</div>;
     }
-    const user = await getUser(parseInt(parkingPermitRequestId));
-
-    if (!user?.id) {
-        return (
-            <div className="p-8 max-w-md space-y-2">
-                <h1 className="text-2xl">
-                    No User Found for that ID.
-                </h1>
-            </div>
-        )
-    }
 
     return (
       <Modal>
