@@ -19,18 +19,23 @@ interface Contact {
   contact_type: any | null;
 };
 interface IParkingPermit {
-    id: number;
-    permit_number: number;
-    vehicle_plate: string;
-    vehicle_plate_state: string | null;
-    vehicle_make: string | null;
-    vehicle_model: string | null;
-    vehicle_color: string | null;
-    unit_number: number;
-    created_at: string | null;
-    created_by: string | null;
-    vehicle_year: string | null;
-    };
+  contact_type: string | null
+  created_at: string
+  created_by: string | null
+  email_address: string | null
+  first_name: string | null
+  id: number
+  last_name: string | null
+  permit_number: string
+  phone_number: string | null
+  unit_number: string
+  vehicle_color: string | null
+  vehicle_make: string | null
+  vehicle_model: string | null
+  vehicle_plate: string
+  vehicle_plate_state: string | null
+  vehicle_year: string | null
+};
 interface IResults { contacts: Contact[]};
 
 const myTheme = themeQuartz.withParams({

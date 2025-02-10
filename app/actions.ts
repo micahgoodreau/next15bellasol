@@ -11,6 +11,7 @@ import { addContactFormSchema, addEmailAddressFormSchema, addParkingPermitFormSc
 import { ActionResponse, ActionResponseTestForm, AddressFormData, TestFormData } from "@/types";
 import { Console, error } from "console";
 import { toast } from "@/hooks/use-toast";
+import { QueryData } from "@supabase/supabase-js";
 
 
 
@@ -223,22 +224,35 @@ export type State =
 
   export async function getParkingPermits(searchString: string) {
     const supabase = await createClient();
+   const parkingPermitsQuery = supabase.from('parking_permits').select(`
+        id,
+         contact_type,
+        created_at,
+        created_by,
+        phone_number,
+        email_address,
+        first_name,
+        last_name,
+        unit_number,
+        permit_number,
+        vehicle_make,
+        vehicle_model,
+        vehicle_color,
+        vehicle_year,
+        vehicle_plate,
+        vehicle_plate_state
+      `)
+      .order('unit_number', { ascending: false })
 
-    if (searchString == "") {
-      const { data: lResults, error } = await supabase
-      .from("parking_permits")
-      .select("*")
-      .order("unit_number", { ascending: false });
-      return lResults;
-    }
-    const { data: sResults, error } = await supabase
-    .from("parking_permits")
-    .select("*")
-    .or(`unit_number.eq.${searchString}, permit_number.eq.${searchString}`)
-    .order("unit_number", { ascending: true });
+    type ParkingPermit = QueryData<typeof parkingPermitsQuery>
+    const { data, error } = await parkingPermitsQuery;
+    if (error) throw error
+    console.log(data, error);
+    const permits: ParkingPermit = data;
 
-    console.log(error, sResults);
-    return sResults;
+
+    return permits;
+
     
   }
 
