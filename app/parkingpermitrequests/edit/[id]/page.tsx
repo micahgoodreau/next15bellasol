@@ -6,10 +6,12 @@ type Props = {
     }
 }
 
-export default async function EditParkingRequest({ params }: Props) {
-    const { id } = await params
-
-
+export default async function EditParkingRequestexport({
+    params,
+  }: {
+    params: Promise<{ id: string }>
+  }) {
+    const id = (await params).id;
     const supabase = await createClient();
     const { data: requestData } = await supabase
       .from("parking_permit_requests")

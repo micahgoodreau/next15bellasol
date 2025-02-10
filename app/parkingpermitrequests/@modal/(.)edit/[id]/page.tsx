@@ -1,11 +1,5 @@
-import { addParkingPermit, deactivateContact, incrementNumberAction } from "@/app/actions";
-import { AddParkingPermitForm } from "@/components/add-parking-permit-form";
-
 import { createClient } from "@/utils/supabase/server";
-
 import React from "react";
-import IncrementNumber from "@/components/increment-number";
-import ApproveParkingRequest from "@/components/approve-parking-request";
 import { Modal } from "@/components/Modal";
 import { getUser } from "@/lib/getUser";
 import ApproveParkingRequest2 from "@/components/approve-parking-request2";
