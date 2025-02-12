@@ -39,7 +39,7 @@ const links = [
   },
   {
     name: "Parking Permit Requests to Approve",
-    href: "/parkingpermitrequests",
+    href: "/parkingpermitrequests?q=NEW%20REQUEST",
     icon: DocumentDuplicateIcon,
   },
   {
@@ -68,6 +68,12 @@ const links = [
     target: "_blank",
     icon: DocumentDuplicateIcon,
   },
+  {
+    name: "NextCentury Water Meters",
+    href: "https://app.nextcenturymeters.com/",
+    target: "_blank",
+    icon: DocumentDuplicateIcon,
+  }
 ];
 
 export default function NavLinks() {

@@ -45,7 +45,7 @@ export default function ApproveParkingRequest2({ parkingPermitRequest }: Props) 
 
     const form = useForm<ParkingPermitRequest>({
         resolver: zodResolver(ParkingPermitRequestSchema),
-        defaultValues: { ...parkingPermitRequest },
+        defaultValues: { ...parkingPermitRequest, permit_number: "" },
     })
 
     useEffect(() => {
