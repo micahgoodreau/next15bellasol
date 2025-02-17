@@ -87,6 +87,7 @@ const SearchPropertyManagers = () => {
         theme={myTheme}
         rowData={data}
         columnDefs={colDefs}
+        onRowClicked={(event) => {router.push(`/contact/${event.data?.id}`)}}
         
       />
     </div>

@@ -9,7 +9,6 @@ import { createServerAction } from "zsa";
 import { revalidatePath } from "next/cache";
 import { addContactFormSchema, addEmailAddressFormSchema, addParkingPermitFormSchema, addPhoneNumberFormSchema, addressSchema, addTestFormSchema, editContactFormSchema, linkContactPropertyFormSchema, testSchema } from "./validation";
 import { ActionResponse, ActionResponseTestForm, AddressFormData, TestFormData } from "@/types";
-import { Console, error } from "console";
 import { toast } from "@/hooks/use-toast";
 import { QueryData } from "@supabase/supabase-js";
 
@@ -58,7 +57,6 @@ export type State =
       }
   
       // Here you would typically save the address to your database
-      console.log('Test Form submitted:', validatedData.data)
   
       return {
         success: true,
@@ -97,7 +95,6 @@ export type State =
       }
   
       // Here you would typically save the address to your database
-      console.log('Address submitted:', validatedData.data)
   
       return {
         success: true,
@@ -247,7 +244,6 @@ export type State =
     type ParkingPermit = QueryData<typeof parkingPermitsQuery>
     const { data, error } = await parkingPermitsQuery;
     if (error) throw error
-    console.log(data, error);
     const permits: ParkingPermit = data;
 
 
@@ -260,7 +256,6 @@ export type State =
     prevState: State | null,
     formdata: FormData,
   ): Promise<State> {
-    console.log(formdata);
     try {
       // Artificial delay; don't forget to remove that!
       //await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -301,14 +296,12 @@ export type State =
         created_by: user?.id
       });
       revalidatePath('/');
-      console.log("ERRORS!!", error);
-      console.log("DATA!!", data);
+
       return {
         status: "success",
         message: `Permit added!`,
       };
     } catch (e) {
-      console.log("ERRORS!!", e);
       // In case of a ZodError (caused by our validation) we're adding issues to our response
       if (e instanceof ZodError) {
         return {
@@ -320,7 +313,6 @@ export type State =
           })),
         };
       }
-      console.log("ERRORS!!", error);
       return {
         status: "error",
         message: "Something went wrong. Please try again.",
@@ -348,8 +340,6 @@ export type State =
       // look up property_id from unit_number
       const { data: property, error: propertyLookupError } = await supabase.from("properties").select("id").eq("unit_number", unit_number).single();
       if (propertyLookupError || !property || !user) {
-        console.log("ERRORS!!", propertyLookupError);
-        console.log("DATA!!", property);
         return {
           status: "error",
           message: "Invalid form data",
@@ -495,7 +485,6 @@ export async function addContact(
     //const var_created_by = user?.id;
 
     const var_created_by = user?.id || "";
-    console.log(user, var_created_by);
     const { data, error } = await supabase.rpc("insert_contact", {
       var_first_name: first_name,
       var_last_name: last_name,
@@ -504,7 +493,6 @@ export async function addContact(
       var_property_id: property_id,
       var_created_by,
     });
-    console.log(data, error);
     revalidatePath('/');
     
     return {
@@ -538,7 +526,6 @@ export async function editContact(
     //await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Validate our data
-    console.log(formdata);
     const { contact_id, first_name, last_name, business_name, contact_type } = editContactFormSchema.parse(formdata);
 
     const supabase = await createClient();
@@ -555,7 +542,6 @@ export async function editContact(
       contact_type,
       updated_by,
     }).eq("id", contact_id);
-    console.log(data, error);
     revalidatePath('/');
     
     return {
@@ -564,7 +550,6 @@ export async function editContact(
     };
   } catch (e) {
     // In case of a ZodError (caused by our validation) we're adding issues to our response
-    console.log("ERRORS!!", e);
     if (e instanceof ZodError) {
       return {
         status: "error",
@@ -603,7 +588,6 @@ export async function deactivateContact(
       updated_by,
       updated_at: new Date().toISOString(),
     }).eq("id", contact_id);
-    console.log(data, error);
     revalidatePath('/');
     
     return {
@@ -612,7 +596,6 @@ export async function deactivateContact(
     };
   } catch (e) {
     // In case of a ZodError (caused by our validation) we're adding issues to our response
-    console.log("ERRORS!!", e);
     if (e instanceof ZodError) {
       return {
         status: "error",
@@ -647,7 +630,6 @@ export const approveParkingRequestAction = createServerAction()
       permit_request_id: z.number()
   }))
   .handler(async ({ input }) => {
-      console.log(input);
       const supabase = await createClient();
       const {
         data: { user },
@@ -662,7 +644,6 @@ export const approveParkingRequestAction = createServerAction()
         updated_at: new Date().toISOString(),
       }).eq("id", input.permit_request_id);
 
-      console.log(data, error);
       revalidatePath('/parkingpermitrequests/[id]', 'page');
       return;
   });
@@ -691,7 +672,6 @@ export const signUpAction = async (formData: FormData) => {
   });
 
   if (error) {
-    console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
   } else {
     return encodedRedirect(
@@ -734,7 +714,6 @@ export const forgotPasswordAction = async (formData: FormData) => {
   });
 
   if (error) {
-    console.error(error.message);
     return encodedRedirect(
       "error",
       "/forgot-password",

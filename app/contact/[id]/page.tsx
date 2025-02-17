@@ -150,7 +150,7 @@ export default async function Page({
       const deactivateContact = async (id: string) => {
         "use server";
         //const requestUrl = new URL(request.url)
-    
+        const delay = (ms: number | undefined) => new Promise(res => setTimeout(res, ms));
         const supabase = await createClient();
         const {
           data: { user },
@@ -161,6 +161,8 @@ export default async function Page({
           .update({ active: false, updated_by: user?.id, updated_at: new Date().toISOString() })
           .eq("id", id);
         revalidatePath("/");
+        await delay(1000);
+        redirect(`/contact/${id}`);
     
         if (error) {
           return redirect(`/login/login?error=Could not create contact`);

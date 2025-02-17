@@ -12,6 +12,10 @@ export default async function Page({
 
     const parkingPermitRequestId = (await params).id;
     const supabase = await createClient();
+    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     const { data: requestData } = await supabase
       .from("parking_permit_requests")
       .select(`id,
@@ -40,12 +44,12 @@ export default async function Page({
         return <div>Request not found</div>;
     }
 
-    return (
+    return user ? (
       <Modal>
             <div className="max-w-md space-y-2 p-8">
             <h1>Parking Permit Request Detail</h1>
               <ApproveParkingRequest2 parkingPermitRequest={requestData} />
             </div>
             </Modal>
-      );
+      ) : (<>Please sign in</>);
     }

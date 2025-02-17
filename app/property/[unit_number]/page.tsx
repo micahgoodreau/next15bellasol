@@ -22,6 +22,10 @@ export default async function Page({
 
     
     const supabase = await createClient();
+    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     interface Dbresults {
       id: string;
@@ -71,7 +75,7 @@ export default async function Page({
   
     if (propertyDetail === null) return <>Property not found.</>;
   
-    return (
+    return user ? (
         <>
         <div className="p-2 bg-gray-700 text-white rounded-sm">
         <p className="pb-2 font-bold">Unit Details</p>
@@ -105,7 +109,8 @@ export default async function Page({
           <p className="w-full p-2 bg-gray-700 text-white rounded-sm">
           {contact.active ? "Active" : "Deactivated"} {contact.contact_type} {contact.first_name} {contact.last_name} <Link href={`/contact/${contact.id}`}>Edit</Link>
             </p>
-            <Table>
+            <Table key={contact.id}>
+              <TableCaption>Contact Information</TableCaption>
 
               <TableBody>
                 {contact?.phone_numbers?.map((phone) => (
@@ -126,5 +131,5 @@ export default async function Page({
 
 
         </>
-    );
+    ) : (<>Please sign in</>);
 }

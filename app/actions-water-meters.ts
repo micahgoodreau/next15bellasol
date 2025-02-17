@@ -20,7 +20,6 @@ export async function getWaterMeters(searchString: string) {
     type WaterMeters = QueryData<typeof metersQuery>
     const { data, error } = await metersQuery;
     if (error) throw error
-    console.log(data, error);
     const meters: WaterMeters = data;
 
 

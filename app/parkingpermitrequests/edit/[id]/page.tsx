@@ -13,6 +13,11 @@ export default async function EditParkingRequestexport({
   }) {
     const id = (await params).id;
     const supabase = await createClient();
+    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const { data: requestData } = await supabase
       .from("parking_permit_requests")
       .select(`id,
@@ -47,10 +52,10 @@ export default async function EditParkingRequestexport({
         )
     }
 
-    return (
+    return user ? (
         <div className="p-8 max-w-md space-y-2">
             <h1 className="text-2xl">Edit User {id}</h1>
             {/* <UserForm user={user} /> */}
         </div>
-    )
+    ) : (<>Please sign in</>);
 }

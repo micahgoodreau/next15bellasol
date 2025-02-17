@@ -13,6 +13,10 @@ import {
 
 export default async function Page() {
   const supabase = await createClient();
+    
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   interface Dbresults {
     id: string;
@@ -44,7 +48,7 @@ export default async function Page() {
   console.log(leepa_sales);
   if (leepa_sales === null || leepa_sales.length === 0)  return <p>No sales to show or not logged in.</p>;
 
-  return (
+  return user ? (
     <Table>
       <TableCaption>A list of your recent invoices.</TableCaption>
       <TableHeader>
@@ -94,5 +98,6 @@ export default async function Page() {
         ))}
       </TableBody>
     </Table>
-  );
+  ) : (
+    <p>Please sign in</p>);
 }

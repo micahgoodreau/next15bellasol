@@ -1,5 +1,6 @@
 import SearchInput from "@/components/SearchInput";
 import SearchParkingPermits from "@/components/SearchParkingPermits";
+import { createClient } from "@/utils/supabase/server";
 import { Suspense } from "react";
 
 
@@ -12,13 +13,18 @@ interface Contact {
   };
 
 export default async function Page() {
+      const supabase = await createClient();
+    
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-       return (
+       return user ? (
         <div>
             <h1 className="pb-2">Parking Permit List</h1>
             <Suspense fallback={<div>Loading...</div>}>
             <SearchParkingPermits />
             </Suspense>
         </div>
-      );
+      ) : (<>Please sign in</>);
 }

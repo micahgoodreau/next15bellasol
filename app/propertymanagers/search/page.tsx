@@ -1,5 +1,6 @@
 import SearchInput from "@/components/SearchInput";
 import SearchPropertyManagers from "@/components/SearchPropertyManagers";
+import { createClient } from "@/utils/supabase/server";
 import { Suspense } from "react";
 
 
@@ -11,14 +12,20 @@ interface Contact {
     contact_type: any;
   };
 
-export default async function Page() {
 
-       return (
+export default async function Page() {
+        const supabase = await createClient();
+      
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+       return user ? (
         <div>
             <h1>Contact List</h1>
             <Suspense fallback={<div>Loading...</div>}>
             <SearchPropertyManagers />
             </Suspense>
         </div>
-      );
+      ) : (<>Please sign in</>);
 }

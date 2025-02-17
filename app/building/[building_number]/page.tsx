@@ -11,7 +11,10 @@ export default async function Page({
   params: Promise<{ building_number: number }>;
 }) {
   const supabase = await createClient();
-
+    
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const buildingNumber = (await params).building_number;
 
   const prev_building_number: number = Number(buildingNumber) - Number(1);
@@ -43,7 +46,7 @@ export default async function Page({
 
   if (properties === null || properties.length === 0) return redirect("/login");
 
-  return (
+  return user ? (
     <>
       <div className="grid grid-cols-2 gap-2 h-screen p-2">
         <div className="">
@@ -110,5 +113,6 @@ export default async function Page({
         </div>
       </div>
     </>
-  );
+  ) : (
+    <>Please sign in</> );
 }

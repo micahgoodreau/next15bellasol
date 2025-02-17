@@ -94,7 +94,7 @@ const LeePaSearchInput = () => {
         theme={myTheme}
         rowData={data}
         columnDefs={colDefs}
-        onRowClicked={(event) => {console.log(event.data?.property_id); router.push(`/property/${event.data?.unit_number}`)}}
+        onRowClicked={(event) => {router.push(`/property/${event.data?.unit_number}`)}}
         
       />
     </div>

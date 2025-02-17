@@ -2,9 +2,15 @@ import Link from "next/link";
 import NavLinks from "@/components/NavLinks";
 import AcmeLogo from "@/components/AcmeLogo";
 import { PowerIcon } from "@heroicons/react/24/outline";
+import { createClient } from "@/utils/supabase/server";
 
-export default function SideNav() {
-  return (
+export default async function SideNav() {
+    const supabase = await createClient();
+  
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+  return user ? (
     <div className="flex h-full flex-col px-3 py-4 md:px-2">
       <Link
         className="mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4 md:h-40"
@@ -25,5 +31,5 @@ export default function SideNav() {
         </form>
       </div>
     </div>
-  );
+  ) : (null);
 }
